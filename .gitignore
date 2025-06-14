@@ -1,0 +1,11 @@
+# Кэши
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+cache/
+*.cache
+.cachedir
+tmp/
+temp/
+.DS_Store
