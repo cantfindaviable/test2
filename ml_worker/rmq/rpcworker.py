@@ -3,7 +3,7 @@ import time
 import logging
 from rmq.rmqconf import RabbitMQConfig
 from llm import do_task
-from typing import Optional
+from typing import Optional, Callable
 from pika.adapters.blocking_connection import BlockingChannel
 from pika.spec import Basic, BasicProperties
 
@@ -134,6 +134,15 @@ class RPCWorker:
             logger.error(f"Ошибка во время прослушивания: {e}")
         finally:
             self.cleanup()
+
+    def set_callback(self, callback: Callable[[str], str]) -> None:
+        """
+        Устанавливает пользовательскую функцию для обработки текста.
+
+        Аргументы:
+            callback: Функция, принимающая строку и возвращающая строку
+        """
+        self.callback = callback
 
     def cleanup(self) -> None:
         """Безопасное закрытие соединений."""

@@ -4,6 +4,8 @@ from chromadb.api.types import EmbeddingFunction, Documents
 import numpy as np
 from typing import List, Optional
 from chromadb.config import Settings
+import logging
+logger = logging.getLogger(__name__)
 
 class LangChainEmbeddingWrapper(EmbeddingFunction):
     def __init__(self, embedder):
@@ -22,9 +24,10 @@ class ChromaDBManager:
             port=port,
             settings=Settings(
                 chroma_api_impl="rest",
-                chroma_server_rest_api_version="v2"
+                # chroma_server_rest_api_version="v2"
             )
         )
+        logger.info("Подключились к ChromaDB", extra={"host": host, "port": port})
         self.embedder = self._load_embeddings()
     
     def _load_embeddings(self):
@@ -38,5 +41,5 @@ class ChromaDBManager:
         try:
             return self.client.get_collection(name=collection_name, embedding_function=self.embedder)
         except Exception as e:
-            # logger.error(f"Коллекция {collection_name} не найдена: {e}")
+            logger.error(f"Коллекция {collection_name} не найдена: {e}")
             raise

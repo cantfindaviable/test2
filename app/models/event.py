@@ -5,6 +5,7 @@ from typing import Optional, List, TYPE_CHECKING
 # Условный импорт для избежания циклических зависимостей
 if TYPE_CHECKING:
     from models.user import User
+    from models.brandbook import Brandbook
     from models.mltask import MLTask
 
 class EventBase(SQLModel):
@@ -40,6 +41,8 @@ class Event(EventBase, table=True):
         sa_relationship_kwargs={"lazy": "selectin"}
     )
     created_at: datetime = Field(default_factory=datetime.utcnow)  # Дата и время создания
+    # mltask_id: Optional[int] = Field(default=None, foreign_key="mltask.id")
+    # mltask: Optional[MLTask] = Relationship(back_populates="event")
     
     def __str__(self) -> str:
         """Возвращает строковое представление события"""

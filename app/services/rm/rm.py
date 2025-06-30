@@ -22,7 +22,7 @@ class RabbitMQClient:
         port: int = 5672,
         username: str = 'rmuser',
         password: str = 'rmpassword',
-        queue_name: str = 'ml_task_queue'
+        queue_name: str = 'rag_queue' #'ml_task_queue'
     ):
         self.connection_params = pika.ConnectionParameters(
             host=host,
@@ -52,7 +52,7 @@ class RabbitMQClient:
             channel = connection.channel()
             
             # Создаем очередь если её нет
-            channel.queue_declare(queue=self.queue_name)
+            channel.queue_declare(queue=self.queue_name, durable=True)
             
             # Подготавливаем сообщение
             message = json.dumps(task.to_queue_message())
@@ -70,21 +70,25 @@ class RabbitMQClient:
         except pika.exceptions.AMQPError as e:
             print(f"RabbitMQ error: {str(e)}")
             return False
+        
+    def send_to_queue(self, queue_name: str, message: dict) -> bool:
+        """Новый метод для отправки сообщения в любую очередь"""
+        try:
+            connection = pika.BlockingConnection(self.connection_params)
+            channel = connection.channel()
+            channel.queue_declare(queue=queue_name, durable=True)
+            body = json.dumps(message)
+            channel.basic_publish(
+                exchange='',
+                routing_key=queue_name,
+                body=body,
+                properties=pika.BasicProperties(delivery_mode=2)
+            )
+            connection.close()
+            return True
+        except pika.exceptions.AMQPError as e:
+            logging.error(f"Ошибка при отправке в очередь {queue_name}: {e}")
+            return False
 
 # Создаем глобальный экземпляр клиента
 rabbit_client = RabbitMQClient()
-
-# def send_ml_task(task: MLTask) -> bool:
-#     """
-#     Отправляет ML задачу на обработку.
-    
-#     Args:
-#         task: Объект MLTask для обработки
-        
-#     Returns:
-#         bool: True если задача успешно отправлена, False в случае ошибки
-#     """
-#     success = rabbit_client.send_task(task)
-#     if success:
-#         task.status = TaskStatus.QUEUED
-#     return success

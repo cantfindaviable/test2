@@ -18,3 +18,4 @@ pytest
 httpx
 fastapi-analytics
 chromadb==1.0.10
+jose

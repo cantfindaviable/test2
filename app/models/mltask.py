@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, List
 from sqlmodel import SQLModel, Field, Relationship
 
 if TYPE_CHECKING:
@@ -11,7 +11,9 @@ class TaskStatus(str, Enum):
     """Статусы выполнения ML задачи"""
     NEW = "new"              # Новая задача
     QUEUED = "queued"        # В очереди на выполнение
-    PROCESSING = "processing" # В процессе обработки
+    RAG_SEARCHING = "rag_searching"
+    LLM_PROMPT_ENHANCEMENT = "llm_prompt_enhancement"
+    IMAGE_GENERATION = "image_generation"
     COMPLETED = "completed"   # Выполнена
     FAILED = "failed"        # Ошибка выполнения
 
@@ -24,8 +26,11 @@ class MLTaskBase(SQLModel):
         result (Optional[str]): Результат обработки ML моделью
     """
     status: TaskStatus = Field(default=TaskStatus.NEW)
-    result: Optional[str] = Field(default=None)
     question: Optional[str] = Field(default=None)
+    brandbook_id: Optional[str] = Field(default=None)
+    enhanced_prompt: Optional[str] = Field(default=None)
+    image_url: Optional[str] = Field(default=None)
+    context: Optional[str] = Field(default=None)
     
 class MLTask(MLTaskBase, table=True):
     """
@@ -41,6 +46,7 @@ class MLTask(MLTaskBase, table=True):
     """
     id: Optional[int] = Field(default=None, primary_key=True)
     user_id: int = Field(foreign_key="user.id")
+    brandbook_id: Optional[str] = Field(default=None)
     # event_id: Optional[int] = Field(foreign_key="event.id")
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
@@ -49,10 +55,7 @@ class MLTask(MLTaskBase, table=True):
         back_populates="ml_tasks",
         sa_relationship_kwargs={"lazy": "selectin"}
     )
-    # event: Optional["Event"] = Relationship(
-    #     back_populates="ml_tasks", 
-    #     sa_relationship_kwargs={"lazy": "selectin"}
-    # )
+    # event: Optional[Event] = Relationship(back_populates="mltask")
 
     def to_queue_message(self) -> dict:
         """Формирует сообщение для отправки в RabbitMQ"""
@@ -66,8 +69,18 @@ class MLTaskCreate(MLTaskBase):
     question: str
     user_id: int
     status: TaskStatus
+    brandbook_id: str
 
 class MLTaskUpdate(MLTaskBase):
     """DTO для обновления существующей ML задачи"""
     status: Optional[TaskStatus] = None
-    result: Optional[str] = None
+    question: Optional[str] = None
+    brandbook_id: Optional[str] = None
+    enhanced_prompt: Optional[str] = None
+    image_url: Optional[str] = None
+    context: Optional[str] = None
+
+class TaskResultRequest(MLTaskBase):
+    enhanced_prompt: Optional[str] = None
+    image_url: Optional[str] = None
+    context: Optional[str] = None

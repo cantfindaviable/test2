@@ -27,7 +27,7 @@ class RabbitMQConfig:
     password: str = 'rmpassword'
     
     # Параметры очередей
-    queue_name: str = 'ml_task_queue'
+    queue_name: str = 'rag_queue' #'ml_task_queue'
     rpc_queue_name: str = 'rpc_queue'
     
     # Параметры соединения

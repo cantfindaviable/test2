@@ -1,6 +1,7 @@
 from rmq.rmqconf import RabbitMQConfig
 from rmq.rmqworker import MLWorker
 from rmq.rpcworker import RPCWorker
+from tasks.regular_task import process_task
 import sys
 import pika
 import time
@@ -40,13 +41,14 @@ def run_worker(worker):
         time.sleep(1)
 
 def main():
-    mode = 'rpc' # Можно использовать rpc
+    mode = 'ml' # Можно использовать rpc
     logger.info(f"Starting worker in {mode} mode")
     
     worker = None
     try:
         config = RabbitMQConfig()
         worker = create_worker(mode, config)
+        worker.set_callback(process_task)
         run_worker(worker)
     except Exception as e:
         logger.error(f"Application error: {e}")

@@ -1,0 +1,11 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+COPY ml_worker/requirements.txt /app/requirements.txt
+
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
+COPY ml_worker/scripts /app/scripts
+COPY ml_worker/data /app/data
+# COPY ml_worker/chromadb_manager.py /app/

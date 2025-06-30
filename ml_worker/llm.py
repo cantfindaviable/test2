@@ -7,7 +7,7 @@ from typing import Optional
 OLLAMA_URL = 'http://ollama:11434/api/generate'
 MODEL_NAME = 'gemma3:1b'
 NUM_PREDICT = 77 # количество токенов для предсказания
-REQUEST_TIMEOUT = 10  # seconds
+REQUEST_TIMEOUT = 60  # seconds
 
 # Настраиваем общий уровень логирования
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
